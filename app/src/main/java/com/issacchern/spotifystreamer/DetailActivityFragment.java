@@ -17,7 +17,6 @@ public class DetailActivityFragment extends Fragment {
     private static final String LOG_TAG = DetailActivityFragment.class.getSimpleName();
     private String mString;
 
-
     private CustomAdapter customAdapter;
 
 
@@ -43,6 +42,7 @@ public class DetailActivityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
+
         Intent intent = getActivity().getIntent();
         if(intent != null && intent.hasExtra(Intent.EXTRA_TEXT)){
             mString = intent.getStringExtra(Intent.EXTRA_TEXT);

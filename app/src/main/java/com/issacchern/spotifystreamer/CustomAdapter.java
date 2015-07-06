@@ -25,7 +25,7 @@ public class CustomAdapter extends ArrayAdapter<IndividualItem> {
 
     }
 
-
+    @Override
     public View getView(int position, View view, ViewGroup parent){
         //get the element from ArrayAdapter at appropriate position
         IndividualItem individualItem = getItem(position);
@@ -45,9 +45,4 @@ public class CustomAdapter extends ArrayAdapter<IndividualItem> {
 
 
     }
-
-
-
-
-
 }
