@@ -24,6 +24,7 @@ import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
+import kaaes.spotify.webapi.android.models.Image;
 
 
 /**
@@ -32,6 +33,7 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
 public class ArtistFragment extends Fragment {
 
     private CustomAdapter customAdapter;
+    private boolean artist_list;
     private ArrayList<IndividualItem>  individualItems = new ArrayList<IndividualItem>();;
     private Timer timer = new Timer();
     private String searchText = "in";
@@ -85,10 +87,9 @@ public class ArtistFragment extends Fragment {
                             @Override
                             public void run() {
                                 searchText = liveSearch.getText().toString();
-                                if(searchText.length() > 2){
+                                if (searchText.length() > 2) {
                                     updateList();
-                                }
-                                else{
+                                } else {
                                 }
                             }
                         });
@@ -113,11 +114,14 @@ public class ArtistFragment extends Fragment {
 
     }
 
-    public class SearchSpotifyTask extends AsyncTask<Void, Void, ArrayList<IndividualItem>>
+    public class SearchSpotifyTask extends AsyncTask<Void, Void, String []>
     {
 
         @Override
-        protected ArrayList<IndividualItem> doInBackground(Void... strings) {
+        protected String [] doInBackground(Void... strings) {
+
+            artist_list = true;
+
 
             SpotifyApi api = new SpotifyApi();
             SpotifyService service = api.getService();
@@ -126,39 +130,88 @@ public class ArtistFragment extends Fragment {
             List<Artist> artists = results.artists.items;
 
 
+
+
             if(artists.size() == 0){
-                Log.i(LOG_TAG, "Artist not found");
+                artist_list = false;
                 return null;
             }
 
             else{
 
+                String [] resultStr = new String[artists.size()];
+
                 for (int i = 0; i < artists.size(); i++) {
                     Artist artist = artists.get(i);
+                    List<Image> images = artist.images;
+                    String id = artist.id;
+                    String url = "";
+                    if (images != null && !images.isEmpty()) {
+                         url = artist.images.get(0).url;
+                    }
+
+
                     Log.i(LOG_TAG, i + " " + artist.name);
+                    resultStr[i] = artist.name + "*" + id + "*" + url;
 
-                    individualItems.add(new IndividualItem(artist.name, "", R.drawable.cold2));
+                    //individualItems.add(new IndividualItem(artist.name, "", R.drawable.cold2));
                 }
-            }
 
-            Log.i(LOG_TAG, "individualitems size = " + individualItems.size());
-            return individualItems;
+                return resultStr;
+            }
         }
 
         @Override
-        protected void onPostExecute(ArrayList<IndividualItem> indis) {
+        protected void onPostExecute(String []  result) {
 
+            if(artist_list == false){
+                customAdapter.clear();
+                Toast.makeText(getActivity(), "No artist found!", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-            if(indis != null){
+            if(result != null){
 
                 customAdapter.clear();
-                Log.i(LOG_TAG, "indis size = " + indis.size());
+
+                String name;
+                String imageURL;
+
+                for(int i = 0; i < result.length; i++){
+                    for(int j = 0 ; j < result[i].length(); j++){
+
+                        if(result[i].charAt(j) == '*'){
+                            Log.i(LOG_TAG, "" + j);
+                            if(j != result[i].length() -1){
+                                name = result[i].substring(0,j);
+                                imageURL = result[i].substring(j+1,result[i].length());
+                                Log.i(LOG_TAG, "name:" + name + " " + "imageURL:" + imageURL);
+                                customAdapter.add(new IndividualItem(name, "", imageURL));
+                            }
+                            else{
+                                name = result[i].substring(0,j);
+                                imageURL = "http://www.vistacollege.edu/images/graphics/page-warning.png";
+                                Log.i(LOG_TAG, "name:" + name + " " + "imageURL: none");
+                                customAdapter.add(new IndividualItem(name, "", imageURL));
+                            }
+                            break;
+                        }
+
+                    }
+
+                }
+
+          //      customAdapter = new CustomAdapter(getActivity(), indis);
+          /*      Log.i(LOG_TAG, "indis size2 = " + indis.size());
+
                 for(IndividualItem ss : indis){
                     Log.i(LOG_TAG, "onPostExecute");
                     customAdapter.add(ss);
                 }
                 customAdapter.addAll(indis);
                 customAdapter.notifyDataSetChanged();
+
+                */
             }
 
         }

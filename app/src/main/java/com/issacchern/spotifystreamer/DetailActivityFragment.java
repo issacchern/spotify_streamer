@@ -21,11 +21,7 @@ public class DetailActivityFragment extends Fragment {
 
 
     IndividualItem [] individualItem ={
-            new IndividualItem("The Scientist" , "In the lab",  R.drawable.cold1),
-            new IndividualItem("Yellow" , "This is just yellow", R.drawable.cold2),
-            new IndividualItem("Clocks", "Time is drifting away", R.drawable.cold3),
-            new IndividualItem("Viva la vida" , "Hoorayyy!", R.drawable.cold4),
-            new IndividualItem("A Sky Full of Stars", "What a night", R.drawable.cold5)
+
 
     };
 

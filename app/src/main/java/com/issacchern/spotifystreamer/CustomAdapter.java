@@ -8,6 +8,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
 import java.util.List;
 
 /**
@@ -35,7 +37,10 @@ public class CustomAdapter extends ArrayAdapter<IndividualItem> {
         }
 
         ImageView iconView = (ImageView) view.findViewById(R.id.list_item_song_image_view);
-        iconView.setImageResource(individualItem.image);
+       // iconView.setImageResource(individualItem.image);
+
+
+        Picasso.with(getContext()).load(individualItem.imageURL).resize(200,200).into(iconView);
         TextView nameView = (TextView) view.findViewById(R.id.list_item_song_text_view);
         nameView.setText(individualItem.name);
         TextView descriptionView = (TextView) view.findViewById(R.id.list_item_song_description_text_view);

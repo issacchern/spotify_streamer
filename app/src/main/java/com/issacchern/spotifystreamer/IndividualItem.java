@@ -6,16 +6,16 @@ package com.issacchern.spotifystreamer;
 public class IndividualItem {
     String name;
     String description;
-    int image;
+    String imageURL;
 
-    public IndividualItem(String name, int image){
+    public IndividualItem(String name, String imageURL){
         this.name = name;
-        this.image = image;
+        this.imageURL = imageURL;
     }
 
-    public IndividualItem(String name, String description, int image){
+    public IndividualItem(String name, String description, String imageURL){
         this.name = name;
         this.description = description;
-        this.image = image;
+        this.imageURL = imageURL;
     }
 }
