@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +31,7 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
 public class ArtistFragment extends Fragment {
 
     private CustomAdapter customAdapter;
-    private ArrayList<IndividualItem>  individualItems = new ArrayList<IndividualItem>();;
+    private ArrayList<IndividualItem>  individualItems = new ArrayList<IndividualItem>();
     private Timer timer = new Timer();
     private String searchText = "in";
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
@@ -54,8 +53,7 @@ public class ArtistFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                String selectedItem = individualItems.get(position).name;
-                Toast.makeText(getActivity(), selectedItem, Toast.LENGTH_SHORT).show();
+                String selectedItem = individualItems.get(position).id;
                 Intent intent = new Intent(getActivity(), DetailActivity.class)
                         .putExtra(Intent.EXTRA_TEXT, selectedItem);
                 startActivity(intent);
@@ -129,13 +127,15 @@ public class ArtistFragment extends Fragment {
             if(artistList != null){
                 customAdapter.clear();
                 for(Artist art : artistList) {
-                    Log.i(LOG_TAG, "onPostExecute");
                     if(art.images != null && !art.images.isEmpty()){
-                        customAdapter.add(new IndividualItem(art.name,art.id,art.images.get(0).url));
+                        customAdapter.add(new IndividualItem(art.name, "Followers: " +
+                                art.followers.total,art.images.get(0).url, art.id));
                     }
                     else{
-                        customAdapter.add(new IndividualItem(art.name,art.id,
-                                "http://www.vistacollege.edu/images/graphics/page-warning.png"));
+                        customAdapter.add(new IndividualItem(art.name,
+                                "Followers: " + art.followers.total,
+                                "http://www.vistacollege.edu/images/graphics/page-warning.png",
+                                art.id));
                     }
                 }
             }

@@ -7,10 +7,13 @@ public class IndividualItem {
     String name;
     String description;
     String imageURL;
+    String id;
 
-    public IndividualItem(String name, String imageURL){
+    public IndividualItem(String name, String description, String imageURL, String id){
         this.name = name;
         this.imageURL = imageURL;
+        this.description = description;
+        this.id = id;
     }
 
     public IndividualItem(String name, String description, String imageURL){

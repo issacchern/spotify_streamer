@@ -33,17 +33,17 @@ public class CustomAdapter extends ArrayAdapter<IndividualItem> {
         IndividualItem individualItem = getItem(position);
 
         if(view == null){
-            view = LayoutInflater.from(getContext()).inflate(R.layout.list_item_song, parent, false);
+            view = LayoutInflater.from(getContext()).inflate(R.layout.list_item, parent, false);
         }
 
-        ImageView iconView = (ImageView) view.findViewById(R.id.list_item_song_image_view);
+        ImageView iconView = (ImageView) view.findViewById(R.id.list_item_image_view);
        // iconView.setImageResource(individualItem.image);
 
 
-        Picasso.with(getContext()).load(individualItem.imageURL).resize(200,200).into(iconView);
-        TextView nameView = (TextView) view.findViewById(R.id.list_item_song_text_view);
+        Picasso.with(getContext()).load(individualItem.imageURL).resize(100,100).into(iconView);
+        TextView nameView = (TextView) view.findViewById(R.id.list_item_text_view);
         nameView.setText(individualItem.name);
-        TextView descriptionView = (TextView) view.findViewById(R.id.list_item_song_description_text_view);
+        TextView descriptionView = (TextView) view.findViewById(R.id.list_item_description_text_view);
         descriptionView.setText(individualItem.description);
 
         return view;

@@ -1,12 +1,24 @@
 package com.issacchern.spotifystreamer;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.ListView;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import kaaes.spotify.webapi.android.SpotifyApi;
+import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.Track;
+import kaaes.spotify.webapi.android.models.Tracks;
 
 
 /**
@@ -18,18 +30,7 @@ public class DetailActivityFragment extends Fragment {
     private String mString;
 
     private CustomAdapter customAdapter;
-
-
-    IndividualItem [] individualItem ={
-
-
-    };
-
-
-  
-
-
-
+    private ArrayList<IndividualItem> individualItems = new ArrayList<IndividualItem>();
 
     public DetailActivityFragment() {
     }
@@ -38,19 +39,17 @@ public class DetailActivityFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
+        customAdapter = new CustomAdapter(getActivity(), individualItems);
+        ListView listView = (ListView) rootView.findViewById(R.id.listView_top_ten_tracks);
+        listView.setAdapter(customAdapter);
 
         Intent intent = getActivity().getIntent();
+
         if(intent != null && intent.hasExtra(Intent.EXTRA_TEXT)){
             mString = intent.getStringExtra(Intent.EXTRA_TEXT);
 
-            ((TextView) rootView.findViewById(R.id.detail_text)).setText(mString);
-
-     //       customAdapter = new CustomAdapter(getActivity(), Arrays.asList(individualItem));
-
-     //       ListView listView = (ListView) rootView.findViewById(R.id.listView_top_ten_tracks);
-      //      listView.setAdapter(customAdapter);
-
-            //create another list of item
+            TopTrackSpotifyTask topTrack = new TopTrackSpotifyTask();
+            topTrack.execute();
 
         }
 
@@ -60,5 +59,36 @@ public class DetailActivityFragment extends Fragment {
 
 
 
+    }
+
+    public class TopTrackSpotifyTask extends AsyncTask<Void, Void, List<Track>>{
+
+
+        @Override
+        protected void onPostExecute(List<Track> mTrack) {
+            if(mTrack != null){
+                customAdapter.clear();
+                for(Track track : mTrack) {
+                    customAdapter.add(new IndividualItem(track.name,track.album.name,
+                            track.album.images.get(0).url));
+                }
+            }
+
+        }
+
+        @Override
+        protected List<Track> doInBackground(Void... params) {
+
+            SpotifyApi spotifyApi = new SpotifyApi();
+            SpotifyService spotifyService = spotifyApi.getService();
+            Map<String, Object> options = new HashMap<>();
+            options.put(SpotifyService.COUNTRY, Locale.getDefault().getCountry());
+            Tracks results = spotifyService.getArtistTopTrack(mString, options);
+            List<Track> tracks = results.tracks;
+
+            return tracks;
+
+
+        }
     }
 }
