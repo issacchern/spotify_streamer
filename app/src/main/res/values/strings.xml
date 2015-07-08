@@ -3,4 +3,9 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_detail">DetailActivity</string>
+    <string name="artist_search_hint">Please insert artist name...</string>
+    <string name="no_internet">Please allow internet!</string>
+    <string name="connection_error">Oops... connection error!</string>
+    <string name="no_track"> No track found!</string>
+
 </resources>

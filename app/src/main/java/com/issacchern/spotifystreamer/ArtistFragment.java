@@ -1,28 +1,30 @@
 package com.issacchern.spotifystreamer;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
-import java.util.TimerTask;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
+import kaaes.spotify.webapi.android.models.Pager;
+import retrofit.RetrofitError;
 
 
 /**
@@ -33,11 +35,19 @@ public class ArtistFragment extends Fragment {
     private CustomAdapter customAdapter;
     private ArrayList<IndividualItem>  individualItems = new ArrayList<IndividualItem>();
     private Timer timer = new Timer();
-    private String searchText = "in";
+    private String searchKeyword = "";
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
+    private List<Artist> artists;
 
 
     public ArtistFragment() {
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
     @Override
@@ -53,13 +63,48 @@ public class ArtistFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                String selectedItem = individualItems.get(position).id;
-                Intent intent = new Intent(getActivity(), DetailActivity.class)
-                        .putExtra(Intent.EXTRA_TEXT, selectedItem);
-                startActivity(intent);
+                if(isNetworkAvailable()){
+                    String selectedItem = individualItems.get(position).id;
+                    Intent intent = new Intent(getActivity(), DetailActivity.class)
+                            .putExtra(Intent.EXTRA_TEXT, selectedItem);
+                    startActivity(intent);
+
+                }else{
+                    Toast.makeText(getActivity(), getResources().getString(R.string.no_internet),
+                            Toast.LENGTH_SHORT).show();
+
+                }
+
+
 
             }
         });
+
+        final SearchView searchText = (SearchView) rootView.findViewById(R.id.searchText);
+
+        searchText.setIconifiedByDefault(false);
+        searchText.setQueryHint(getResources().getString(R.string.artist_search_hint));
+        searchText.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                searchKeyword = searchText.getQuery().toString();
+                if (isNetworkAvailable()) {
+                    SearchSpotifyTask task = new SearchSpotifyTask();
+                    task.execute(searchText.getQuery().toString());
+                } else {
+                    Toast.makeText(getActivity(), getResources().getString(R.string.no_internet),
+                            Toast.LENGTH_SHORT).show();
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+
+        /*
 
         final EditText liveSearch = (EditText) rootView.findViewById(R.id.editText_artist);
         liveSearch.addTextChangedListener(new TextWatcher() {
@@ -96,21 +141,29 @@ public class ArtistFragment extends Fragment {
             }
         });
 
+        */
+
         return rootView;
     }
 
 
-    public class SearchSpotifyTask extends AsyncTask<Void, Void, List<Artist>>
+    public class SearchSpotifyTask extends AsyncTask<String, Void, List<Artist>>
     {
 
         @Override
-        protected List<Artist> doInBackground(Void... strings) {
+        protected List<Artist> doInBackground(String ... strings) {
 
             SpotifyApi api = new SpotifyApi();
             SpotifyService service = api.getService();
 
-            ArtistsPager results = service.searchArtists(searchText);
-            List<Artist> artists = results.artists.items;
+            try {
+                ArtistsPager searchResults = service.searchArtists(strings[0]);
+                Pager<Artist> results = searchResults.artists;
+                artists = results.items;
+            } catch(RetrofitError ex){
+                Toast.makeText(getActivity(), getResources().getString(R.string.connection_error),
+                        Toast.LENGTH_SHORT).show();
+            }
 
 
             if(artists.size() == 0){

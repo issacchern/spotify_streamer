@@ -37,10 +37,14 @@ public class CustomAdapter extends ArrayAdapter<IndividualItem> {
         }
 
         ImageView iconView = (ImageView) view.findViewById(R.id.list_item_image_view);
-       // iconView.setImageResource(individualItem.image);
 
+        try{
+            Picasso.with(getContext()).load(individualItem.imageURL).resize(100,100).into(iconView);
 
-        Picasso.with(getContext()).load(individualItem.imageURL).resize(100,100).into(iconView);
+        }catch(IllegalArgumentException e){
+            iconView.setImageResource(R.drawable.image1);
+        }
+
         TextView nameView = (TextView) view.findViewById(R.id.list_item_text_view);
         nameView.setText(individualItem.name);
         TextView descriptionView = (TextView) view.findViewById(R.id.list_item_description_text_view);

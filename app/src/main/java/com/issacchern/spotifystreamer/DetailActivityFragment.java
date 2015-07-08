@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,6 +20,7 @@ import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.Track;
 import kaaes.spotify.webapi.android.models.Tracks;
+import retrofit.RetrofitError;
 
 
 /**
@@ -28,6 +30,8 @@ public class DetailActivityFragment extends Fragment {
 
     private static final String LOG_TAG = DetailActivityFragment.class.getSimpleName();
     private String mString;
+    private List<Track> tracks;
+    private boolean check_internet;
 
     private CustomAdapter customAdapter;
     private ArrayList<IndividualItem> individualItems = new ArrayList<IndividualItem>();
@@ -66,6 +70,14 @@ public class DetailActivityFragment extends Fragment {
 
         @Override
         protected void onPostExecute(List<Track> mTrack) {
+
+            if(!check_internet){
+                Toast.makeText(getActivity(),  getResources().getString(R.string.connection_error),
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+
             if(mTrack != null){
                 customAdapter.clear();
                 for(Track track : mTrack) {
@@ -73,20 +85,38 @@ public class DetailActivityFragment extends Fragment {
                             track.album.images.get(0).url));
                 }
             }
+            else{
+                Toast.makeText(getActivity(),  getResources().getString(R.string.no_track),
+                        Toast.LENGTH_SHORT).show();
+            }
 
         }
 
         @Override
         protected List<Track> doInBackground(Void... params) {
 
-            SpotifyApi spotifyApi = new SpotifyApi();
-            SpotifyService spotifyService = spotifyApi.getService();
-            Map<String, Object> options = new HashMap<>();
-            options.put(SpotifyService.COUNTRY, Locale.getDefault().getCountry());
-            Tracks results = spotifyService.getArtistTopTrack(mString, options);
-            List<Track> tracks = results.tracks;
+
+            try{
+                SpotifyApi spotifyApi = new SpotifyApi();
+                SpotifyService spotifyService = spotifyApi.getService();
+                Map<String, Object> options = new HashMap<>();
+                options.put(SpotifyService.COUNTRY, Locale.getDefault().getCountry());
+                Tracks results = spotifyService.getArtistTopTrack(mString, options);
+                tracks = results.tracks;
+
+                check_internet = true;
+
+            } catch(RetrofitError ex){
+                check_internet =false;
+
+            }
 
             return tracks;
+
+
+
+
+
 
 
         }
