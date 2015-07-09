@@ -12,9 +12,6 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-/**
- * Created by Issac on 6/27/2015.
- */
 public class CustomAdapter extends ArrayAdapter<IndividualItem> {
 
     private static final String LOG_TAG = CustomAdapter.class.getSimpleName();
@@ -32,26 +29,35 @@ public class CustomAdapter extends ArrayAdapter<IndividualItem> {
         //get the element from ArrayAdapter at appropriate position
         IndividualItem individualItem = getItem(position);
 
+        ViewHolder holder = new ViewHolder();
+
         if(view == null){
             view = LayoutInflater.from(getContext()).inflate(R.layout.list_item, parent, false);
         }
 
-        ImageView iconView = (ImageView) view.findViewById(R.id.list_item_image_view);
+        holder.iconView = (ImageView) view.findViewById(R.id.list_item_image_view);
 
         try{
-            Picasso.with(getContext()).load(individualItem.imageURL).resize(100,100).into(iconView);
+            Picasso.with(getContext()).load(individualItem.imageURL).resize(100,100).into(holder.iconView);
 
         }catch(IllegalArgumentException e){
-            iconView.setImageResource(R.drawable.image1);
+            holder.iconView.setImageResource(R.drawable.image1);
         }
 
-        TextView nameView = (TextView) view.findViewById(R.id.list_item_text_view);
-        nameView.setText(individualItem.name);
-        TextView descriptionView = (TextView) view.findViewById(R.id.list_item_description_text_view);
-        descriptionView.setText(individualItem.description);
+        holder.nameView = (TextView) view.findViewById(R.id.list_item_text_view);
+        holder.nameView.setText(individualItem.name);
+        holder.descriptionView = (TextView) view.findViewById(R.id.list_item_description_text_view);
+        holder.descriptionView.setText(individualItem.description);
+        view.setTag(holder);
 
         return view;
 
 
+    }
+
+    static class ViewHolder{
+        ImageView iconView;
+        TextView nameView;
+        TextView descriptionView;
     }
 }

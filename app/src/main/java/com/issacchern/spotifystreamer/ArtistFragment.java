@@ -17,7 +17,6 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
@@ -26,17 +25,14 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
 import kaaes.spotify.webapi.android.models.Pager;
 import retrofit.RetrofitError;
 
-
-/**
- * A placeholder fragment containing a simple view.
- */
 public class ArtistFragment extends Fragment {
 
+    private static final String STATE_ITEM = "state_item";
     private CustomAdapter customAdapter;
-    private ArrayList<IndividualItem>  individualItems = new ArrayList<IndividualItem>();
-    private Timer timer = new Timer();
+    ArrayList<IndividualItem>  individualItems ;
+    //private Timer timer = new Timer();
     private String searchKeyword = "";
-    private static final String LOG_TAG = MainActivity.class.getSimpleName();
+    //private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private List<Artist> artists;
 
 
@@ -51,58 +47,73 @@ public class ArtistFragment extends Fragment {
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList(STATE_ITEM, individualItems);
+        super.onSaveInstanceState(outState);
+
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        customAdapter = new CustomAdapter(getActivity(), individualItems);
         ListView listView = (ListView) rootView.findViewById(R.id.listView_artist);
-        listView.setAdapter(customAdapter);
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        if(savedInstanceState != null){
+            individualItems = savedInstanceState.getParcelableArrayList(STATE_ITEM);
+            customAdapter = new CustomAdapter(getActivity(), individualItems);
+            listView.setAdapter(customAdapter);
+        }
+        else{
+            individualItems = new ArrayList<>();
+            customAdapter = new CustomAdapter(getActivity(), individualItems);
+            listView.setAdapter(customAdapter);
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                if(isNetworkAvailable()){
-                    String selectedItem = individualItems.get(position).id;
-                    Intent intent = new Intent(getActivity(), DetailActivity.class)
-                            .putExtra(Intent.EXTRA_TEXT, selectedItem);
-                    startActivity(intent);
+                    if(isNetworkAvailable()){
+                        String selectedItem = individualItems.get(position).id;
+                        Intent intent = new Intent(getActivity(), DetailActivity.class)
+                                .putExtra(Intent.EXTRA_TEXT, selectedItem);
+                        startActivity(intent);
 
-                }else{
-                    Toast.makeText(getActivity(), getResources().getString(R.string.no_internet),
-                            Toast.LENGTH_SHORT).show();
+                    }else{
+                        Toast.makeText(getActivity(), getResources().getString(R.string.no_internet),
+                                Toast.LENGTH_SHORT).show();
+
+                    }
+
+
 
                 }
+            });
 
+            final SearchView searchText = (SearchView) rootView.findViewById(R.id.searchText);
 
-
-            }
-        });
-
-        final SearchView searchText = (SearchView) rootView.findViewById(R.id.searchText);
-
-        searchText.setIconifiedByDefault(false);
-        searchText.setQueryHint(getResources().getString(R.string.artist_search_hint));
-        searchText.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                searchKeyword = searchText.getQuery().toString();
-                if (isNetworkAvailable()) {
-                    SearchSpotifyTask task = new SearchSpotifyTask();
-                    task.execute(searchText.getQuery().toString());
-                } else {
-                    Toast.makeText(getActivity(), getResources().getString(R.string.no_internet),
-                            Toast.LENGTH_SHORT).show();
+            searchText.setIconifiedByDefault(false);
+            searchText.setQueryHint(getResources().getString(R.string.artist_search_hint));
+            searchText.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    searchKeyword = searchText.getQuery().toString();
+                    if (isNetworkAvailable()) {
+                        SearchSpotifyTask task = new SearchSpotifyTask();
+                        task.execute(searchText.getQuery().toString());
+                    } else {
+                        Toast.makeText(getActivity(), getResources().getString(R.string.no_internet),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                    return false;
                 }
-                return false;
-            }
 
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                return false;
-            }
-        });
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    return false;
+                }
+            });
+        }
+
 
         /*
 

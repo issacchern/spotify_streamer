@@ -23,40 +23,60 @@ import kaaes.spotify.webapi.android.models.Tracks;
 import retrofit.RetrofitError;
 
 
-/**
- * A placeholder fragment containing a simple view.
- */
+
 public class DetailActivityFragment extends Fragment {
 
-    private static final String LOG_TAG = DetailActivityFragment.class.getSimpleName();
+    //private static final String LOG_TAG = DetailActivityFragment.class.getSimpleName();
+    private static final String CURRENT_TRACK_RESULTS_KEY = "Current tracks" ;
     private String mString;
     private List<Track> tracks;
     private boolean check_internet;
 
     private CustomAdapter customAdapter;
-    private ArrayList<IndividualItem> individualItems = new ArrayList<IndividualItem>();
+    private ArrayList<IndividualItem> individualItems = new ArrayList<>();
 
     public DetailActivityFragment() {
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+
+        outState.putParcelableArrayList(CURRENT_TRACK_RESULTS_KEY, individualItems);
+
+        super.onSaveInstanceState(outState);
+    }
+
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
-        customAdapter = new CustomAdapter(getActivity(), individualItems);
-        ListView listView = (ListView) rootView.findViewById(R.id.listView_top_ten_tracks);
-        listView.setAdapter(customAdapter);
+        if(savedInstanceState == null){
 
-        Intent intent = getActivity().getIntent();
+            customAdapter = new CustomAdapter(getActivity(), individualItems);
+            ListView listView = (ListView) rootView.findViewById(R.id.listView_top_ten_tracks);
+            listView.setAdapter(customAdapter);
 
-        if(intent != null && intent.hasExtra(Intent.EXTRA_TEXT)){
-            mString = intent.getStringExtra(Intent.EXTRA_TEXT);
+            Intent intent = getActivity().getIntent();
 
-            TopTrackSpotifyTask topTrack = new TopTrackSpotifyTask();
-            topTrack.execute();
+            if(intent != null && intent.hasExtra(Intent.EXTRA_TEXT)){
+                mString = intent.getStringExtra(Intent.EXTRA_TEXT);
+
+                TopTrackSpotifyTask topTrack = new TopTrackSpotifyTask();
+                topTrack.execute();
+
+            }
 
         }
+        else{
+            individualItems = savedInstanceState.getParcelableArrayList(CURRENT_TRACK_RESULTS_KEY);
+            customAdapter = new CustomAdapter(getActivity(), individualItems);
+            ListView listView = (ListView) rootView.findViewById(R.id.listView_top_ten_tracks);
+            listView.setAdapter(customAdapter);
 
+
+        }
 
         return rootView;
 
